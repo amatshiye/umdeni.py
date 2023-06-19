@@ -10,11 +10,10 @@ class Bot(discord.Client):
     async def on_message(self, message: discord.Message):
         if message.author == self.user:
             return
-        await message.author.voice.channel.connect()
-        CommandHandler(message, self)
+        ch = CommandHandler(message, self)
+        await ch.run_command()
 
 
 if __name__ == "__main__":
     bot = Bot(intents=define_intents())
-
     bot.run(get_token())

@@ -1,5 +1,7 @@
 import discord
 
+from src.command.disconnect import disconnect_command
+from src.command.join import join_command
 
 class CommandHandler:
     def __init__(self, message: discord.Message, context: discord.Client):
@@ -9,7 +11,6 @@ class CommandHandler:
         self.msg = message
 
         self.parse_command()
-        self.run_command()
 
     def parse_command(self):
         if len(self.msg.content) < 2:
@@ -19,11 +20,18 @@ class CommandHandler:
             return
         parts = self.msg.content.split("-")[1]
         args = parts.split(" ")
-        if len(args) < 1:
+        if len(args) < 2:
+            self.cmd = args[0]  # command
             return
-        self.cmd = args[0]  # command
-        self.arg = args[1]  # youtube link
+        else:
+            self.cmd = args[0]  # command
+            self.arg = args[1]  # youtube link
 
-    def run_command(self):
-        print("Command:", self.cmd)
-        print("Link:", self.arg)
+    async def run_command(self):
+        match self.cmd:
+            case "join":
+                await join_command(context=self.ctx, message=self.msg)
+            case "dc":
+                await disconnect_command(context=self.ctx, message=self.msg)
+            case _:
+                print("Error:: Command not found. Method::run_command")
