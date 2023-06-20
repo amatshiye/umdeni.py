@@ -2,4 +2,4 @@ import discord
 
 
 async def join_command(context: discord.Client, message: discord.Message):
-    await message.author.voice.channel.connect()
+    return await message.author.voice.channel.connect(self_deaf=True)

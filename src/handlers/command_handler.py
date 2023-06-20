@@ -2,6 +2,8 @@ import discord
 
 from src.command.disconnect import disconnect_command
 from src.command.join import join_command
+from src.command.play import play_command
+
 
 class CommandHandler:
     def __init__(self, message: discord.Message, context: discord.Client):
@@ -33,5 +35,7 @@ class CommandHandler:
                 await join_command(context=self.ctx, message=self.msg)
             case "dc":
                 await disconnect_command(context=self.ctx, message=self.msg)
+            case "p":
+                await play_command(context=self.ctx, message=self.msg)
             case _:
                 print("Error:: Command not found. Method::run_command")
