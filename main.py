@@ -1,3 +1,5 @@
+import requests.exceptions
+
 from src.handlers.command_handler import CommandHandler
 from src.helpers.discord_config import get_token, define_intents
 import discord
@@ -11,6 +13,14 @@ class Bot(discord.Client):
         if message.author == self.user:
             return
         ch = CommandHandler(message, self)
+
+        try:
+            if not ch.check_video_url():
+                return
+        except requests.exceptions.MissingSchema as error:
+            await message.channel.send("Url is invalid.")
+            print("Error:: Invalid url. Stacktrace::", error)
+            return
         await ch.run_command()
 
 
