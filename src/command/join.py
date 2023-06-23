@@ -1,5 +1,15 @@
 import discord
 
+from src.handlers.command_handler import bot
+from src.handlers.simple_embeds import simple_success_embed, simple_error_embed
 
-async def join_command(context: discord.Client, message: discord.Message):
-    return await message.author.voice.channel.connect(self_deaf=True)
+
+@bot.command(name="join")
+async def join_command(message: discord.Message):
+    channel = message.author.voice.channel
+
+    if channel is not None:
+        await channel.connect()
+        await message.channel.send(embeds=[simple_success_embed(f"Joined **{channel.name}** channel.")])
+    else:
+        await message.channel.send(embeds=[simple_error_embed("Failed to join channel.")])
