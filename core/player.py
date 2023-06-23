@@ -15,6 +15,7 @@ class Player:
         self.current_song_path = "./player/current.mp3"
         self.link = url
         self.songs = []
+        self.voice = None
         self.get_links_from_url()
 
     def get_links_from_url(self):
@@ -50,12 +51,17 @@ class Player:
             subprocess.run(["rm", "-rf", "player/current.mp3"])
 
     async def play_song(self, voice_client: discord.VoiceClient, song):
+        self.voice = voice_client
         print("Playing url::", song)
         ffmpeg_options = {
             "options": f"-vn -ss 0"}
 
         audio_source = discord.FFmpegOpusAudio(source=self.current_song_path, **ffmpeg_options)
-        voice_client.play(audio_source)
+        self.voice.play(audio_source)
 
         while voice_client.is_playing():
             await sleep(.1)
+
+    async def pause_song(self):
+        if self.voice is discord.VoiceClient:
+            await self.voice.pause()

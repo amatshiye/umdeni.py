@@ -6,6 +6,7 @@ import requests as requests
 from core.player import Player
 from src.command.disconnect import disconnect_command
 from src.command.join import join_command
+from src.command.pause import pause_command
 from src.command.play import play_command
 
 
@@ -29,20 +30,19 @@ class CommandHandler:
         args = parts.split(" ")
         if len(args) < 2:
             self.cmd = args[0]  # command
-            return
         else:
             self.cmd = args[0]  # command
             self.arg = args[1]  # youtube link
 
     def check_video_url(self):
-        if self.arg is None:
-            return False
-        if not self.arg.find("youtu"):
+        if self.arg is not None and not self.arg.find("youtu"):
             print("Error:: Not a valid youtube link")
             return False
 
-        request = requests.get(self.arg)
-        return request.status_code == 200
+        if self.arg is not None:
+            request = requests.get(self.arg)
+            return request.status_code == 200
+        return True
 
     async def run_command(self):
         match self.cmd:
@@ -53,5 +53,10 @@ class CommandHandler:
             case "p":
                 self.player = Player(self.arg)
                 await play_command(context=self.ctx, message=self.msg, player=self.player)
+            case "pause":
+                if self.player is not None:
+                    await pause_command(self.player)
+                else:
+                    print("Error:: Player not initialised.")
             case _:
                 print("Error:: Command not found. Method::run_command")
