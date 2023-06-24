@@ -1,7 +1,7 @@
 import discord
 
 from src.handlers.command_handler import bot
-from src.handlers.simple_embeds import simple_success_embed, simple_error_embed
+from src.helpers.simple_embeds import simple_success_embed, simple_error_embed
 
 
 @bot.command(name="join")

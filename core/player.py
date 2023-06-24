@@ -1,3 +1,5 @@
+import os.path
+import platform
 import subprocess
 from asyncio import sleep
 
@@ -5,8 +7,20 @@ import discord
 
 
 def download_song(link):
-    subprocess.run(["rm", "-rf", "player/current.mp3"])
-    subprocess.run(["yt-dlp", "--extract-audio", "--audio-format", "mp3", "-o", "player/current.mp3", link])
+    location = "player"
+    file = "current.mp3"
+    delete_song(location, file)
+
+    subprocess.run(["yt-dlp", "--extract-audio", "--audio-format", "mp3", "-o", f"{location}/{file}", link])
+
+
+def delete_song(path_to_file, file):
+    path = os.path.join(path_to_file, file)
+    os.remove(path)
+
+
+async def pause_song(voice_client: discord.VoiceClient):
+    voice_client.pause()
 
 
 class Player:
@@ -15,7 +29,6 @@ class Player:
         self.current_song_path = "./player/current.mp3"
         self.link = url
         self.songs = []
-        self.voice = None
         self.get_links_from_url()
 
     def get_links_from_url(self):
@@ -45,23 +58,23 @@ class Player:
             print("Url List::", self.songs)
 
     async def play_songs(self, voice_client: discord.VoiceClient):
+
         for song in self.songs:
             download_song(song)
             await self.play_song(voice_client, song)
-            subprocess.run(["rm", "-rf", "player/current.mp3"])
 
     async def play_song(self, voice_client: discord.VoiceClient, song):
-        self.voice = voice_client
         print("Playing url::", song)
         ffmpeg_options = {
             "options": f"-vn -ss 0"}
 
         audio_source = discord.FFmpegOpusAudio(source=self.current_song_path, **ffmpeg_options)
-        self.voice.play(audio_source)
+        voice_client.play(audio_source)
+
+        location = "player"
+        file = "current.mp3"
 
         while voice_client.is_playing():
             await sleep(.1)
-
-    async def pause_song(self):
-        if self.voice is discord.VoiceClient:
-            await self.voice.pause()
+        if not voice_client.is_playing() and not voice_client.is_paused():
+            delete_song(location, file)

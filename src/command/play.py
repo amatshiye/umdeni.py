@@ -1,20 +1,34 @@
-
 import discord
 
 from core.player import Player
-from src.command.join import join_command
+from src.handlers.command_handler import bot
+from src.helpers.simple_embeds import simple_success_embed, simple_error_embed
 
 
-async def play_command(context: discord.Client, message: discord.Message, player: Player):
-    voice_client = None
-    try:
-        voice_client = await connect_to_channel(context, message)
-    except Exception as error:
-        voice_client = context.voice_clients[0]
-        print("Error:: Failed to connect to channel. Reason::", error)
-
-    await player.play_songs(voice_client)
+@bot.command(name="p")
+async def p(message: discord.Message, link=None):
+    await play_command(message, link)
 
 
-async def connect_to_channel(context: discord.Client, message: discord.Message):
-    return await join_command(context=context, message=message)
+@bot.command(name="play")
+async def play(message: discord.Message, link=None):
+    await play_command(message, link)
+
+
+async def play_command(message: discord.Message, link=None):
+    if link is None:
+        await message.channel.send(embeds=[simple_error_embed("Please provide a link for this command.")])
+        return
+    voice_channel = message.author.guild.voice_client
+
+    if voice_channel is None:
+        channel = message.author.voice.channel
+        await channel.connect()
+    else:
+        channel = voice_channel.channel
+
+    # create player object
+    player = Player(url=link)
+
+    await player.play_songs(voice_client=bot.voice_clients[-1])
+    await message.channel.send(embeds=[simple_success_embed(f"Currently in **{channel.name}** channel")])
