@@ -1,5 +1,6 @@
 import discord
 
+from core.player import resume_song
 from src.handlers.command_handler import bot
 from src.helpers.simple_embeds import simple_error_embed, simple_success_embed
 
@@ -12,7 +13,7 @@ async def resume_command(message: discord.Message):
         return
 
     if voice_client.is_paused():
-        voice_client.resume()
+        await resume_song(voice_client)
         await message.channel.send(embeds=[simple_success_embed("Resumed.")])
     else:
         await message.channel.send(embeds=[simple_error_embed("Current song not paused.")])

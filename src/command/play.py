@@ -28,7 +28,7 @@ async def play_command(message: discord.Message, link=None):
         channel = voice_channel.channel
 
     # create player object
-    player = Player(url=link)
+    bot.player = Player(url=link, message=message)
 
-    await player.play_songs(voice_client=bot.voice_clients[-1])
+    await bot.player.play_songs(voice_client=bot.voice_clients[-1])
     await message.channel.send(embeds=[simple_success_embed(f"Currently in **{channel.name}** channel")])
