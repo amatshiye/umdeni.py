@@ -1,5 +1,4 @@
 import os.path
-import platform
 import subprocess
 from asyncio import sleep
 from typing import List
@@ -25,7 +24,10 @@ def delete_file(path_to_file, file, voice_client: discord.VoiceClient):
     files = os.scandir(path_to_file)
     for _file in files:
         if _file.name == file:
-            os.remove(_file)
+            try:
+                os.remove(_file)
+            except PermissionError as error:
+                print("Error:: Failed to delete file. Reason::", error)
 
 
 async def pause_song(voice_client: discord.VoiceClient):
@@ -84,7 +86,11 @@ class Player:
 
         for song in self.songs:
             download_song(song.url, voice_client)
-            await self.play_song(voice_client, song)
+            try:
+                await self.play_song(voice_client, song)
+            except BaseException as error:
+                print("Error:: Failed to play songs. Reason::", error)
+                break
 
     async def play_song(self, voice_client: discord.VoiceClient, song: Song):
         if voice_client.is_paused() or voice_client.is_playing():
@@ -94,7 +100,11 @@ class Player:
             "options": f"-vn -ss 0"}
 
         audio_source = discord.FFmpegOpusAudio(source=self.current_song_path, **ffmpeg_options)
-        voice_client.play(audio_source)
+        try:
+            voice_client.play(audio_source)
+        except discord.errors.ClientException as error:
+            print("Error:: Failed to play audio. Reason::", error)
+            raise Exception(error)
 
         location = "player"
         file = "current.mp3"
