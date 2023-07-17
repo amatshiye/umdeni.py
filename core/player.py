@@ -11,10 +11,11 @@ from src.helpers.simple_embeds import simple_success_embed
 
 def download_song(link, voice_client: discord.VoiceClient):
     location = "player"
-    file = "current.mp3"
+    file = "current.opus"
 
     delete_file(location, file, voice_client)
-    subprocess.run(["yt-dlp", "--extract-audio", "--audio-format", "mp3", "-o", f"{location}/{file}", link])
+    subprocess.run(["yt-dlp", "--extract-audio", "--audio-format", "opus", "--audio-quality", "1", "-o",
+                    f"{location}/{file}", link])
 
 
 def delete_file(path_to_file, file, voice_client: discord.VoiceClient):
@@ -43,7 +44,7 @@ async def resume_song(voice_client: discord.VoiceClient):
 class Player:
     def __init__(self, url, message: discord.Message):
         self.playlist_path = "./player/playlist.txt"
-        self.current_song_path = "./player/current.mp3"
+        self.current_song_path = "./player/current.opus"
         self.link = url
         self.songs: List[Song] = list()
         self.get_links_from_url()
@@ -54,8 +55,8 @@ class Player:
             try:
                 if os.path.exists(self.playlist_path):
                     os.remove(self.playlist_path)
-                subprocess.run(["yt-dlp", f"{self.link}", "-j", "--flat-playlist", "--print-to-file",
-                                "%(url)s^&&^%(title)s^&&^%(duration)s", self.playlist_path])
+                subprocess.run(["yt-dlp", f"{self.link}", "-j", "--flat-playlist", "--playlist-items", "1-5",
+                                "--print-to-file", "%(url)s^&&^%(title)s^&&^%(duration)s", self.playlist_path])
                 self.create_songs_list()
             except subprocess.CalledProcessError as error:
                 print("Error:: Failed to get urls. Reason::", error)
